@@ -1,7 +1,26 @@
 package main;
 
 public enum Jogador {
-    JOGADOR_PECAS_BRANCAS,
-    JOGADOR_PECAS_PRETAS
+    BRANCAS,
+    PRETAS;
+
+    private int pontos;
+
+    Jogador() {
+        this.pontos = 0;
+    }
+
+    public Jogador proximo() {
+        return (this == BRANCAS) ? PRETAS : BRANCAS;
+    }
+
+    public void incrementarPontuacao () {
+        pontos++;
+    }
+
+    public int getPontuacao () {
+        return pontos;
+    }
 }
+
 
