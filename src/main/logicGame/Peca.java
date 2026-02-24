@@ -1,4 +1,4 @@
-package main;
+package main.logicGame;
 
 //Clase final peça para aumentar a legibilidade
 

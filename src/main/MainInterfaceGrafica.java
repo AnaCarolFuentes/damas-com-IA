@@ -1,5 +1,11 @@
 package main;
 
+import main.logicGame.Jogador;
+import main.logicGame.Peca;
+import main.logicGame.Tabuleiro;
+import main.ui.CasaBotao;
+import main.ui.PintarTabuleiro;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -11,6 +17,7 @@ public final class MainInterfaceGrafica extends JFrame {
 
     private final int TAMANHO = 6;
     private final CasaBotao[][] tabuleiroInterface = new CasaBotao[TAMANHO][TAMANHO];
+    private final PintarTabuleiro paint;
     private Jogador jogadorAtual = Jogador.BRANCAS;
     /*
         Vazio: 0
@@ -30,7 +37,7 @@ public final class MainInterfaceGrafica extends JFrame {
             - NA IMPOSSIBILIDADE DE EFETUAR JOGADAS, O JOGADOR TRAVADO PERDE O JOGO
     */
 
-    private final Tabuleiro tabuleiroLogico; 
+    private final Tabuleiro tabuleiroLogico;
 
     private int linhaOrigem = -1, colOrigem = -1;
 
@@ -40,6 +47,8 @@ public final class MainInterfaceGrafica extends JFrame {
             TABULEIRO DO JOGO
         */
         tabuleiroLogico = new Tabuleiro();
+
+        paint = new PintarTabuleiro(tabuleiroLogico, tabuleiroInterface);
 
         setTitle("DISCIPLINA - IA - MINI JOGO DE DAMA");
         setSize(800, 800);
@@ -59,9 +68,9 @@ public final class MainInterfaceGrafica extends JFrame {
 
                 // Cores do tabuleiro
                 if ((i + j) % 2 == 0) {
-                    tabuleiroInterface[i][j].setBackground(new Color(235, 235, 208)); // Bege
+                    paint.setBackgroundBeige(i, j);
                 } else {
-                    tabuleiroInterface[i][j].setBackground(new Color(119, 149, 86));  // Verde
+                    paint.setBackgroundPink(i, j);
                 }
 
                 final int linha = i;
@@ -77,11 +86,14 @@ public final class MainInterfaceGrafica extends JFrame {
         char casaAtual = tabuleiroLogico.getMatriz()[linha][col];
         // Caso 1: Nenhuma peça selecionada ainda
         if (linhaOrigem == -1) {
+
+            paint.resetarCoresPadrao();
             // Verifica se a casa clicada contém QUALQUER peça (1, 2, 3 ou 4)
             if (casaAtual != Peca.VAZIA && casaAtual != Peca.INVALIDA && Peca.vezDe(jogadorAtual, casaAtual)) {
                 linhaOrigem = linha;
                 colOrigem = col;
                 tabuleiroInterface[linha][col].setBackground(Color.YELLOW); // Destaque do clique
+                paint.destacarMovimentosPossiveis(linhaOrigem, colOrigem);
             }
         } 
         // Caso 2: Já existe uma peça selecionada, tentando mover
@@ -94,8 +106,7 @@ public final class MainInterfaceGrafica extends JFrame {
             }
 
             if(!tabuleiroLogico.movimentoPossivel(linhaOrigem, colOrigem, linha, col)) return;
-
-            boolean sucesso = moverPecaLogica(linhaOrigem, colOrigem, linha, col);
+            boolean sucesso = tabuleiroLogico.moverPecaLogica(linhaOrigem, colOrigem, linha, col);
 
             if (sucesso) {
                 cancelarSelecao();
@@ -104,47 +115,17 @@ public final class MainInterfaceGrafica extends JFrame {
                 /*
                     IMPLEMENTAÇÃO DA JOGADA DA IA
                 */
-            } else {
-                // Se o movimento for inválido (ex: clicar em cima de outra peça)
-                cancelarSelecao();
             }
+            cancelarSelecao(); // Sempre limpa as cores após uma tentativa de movimento
         }
     }
 
     private void cancelarSelecao() {
         if (linhaOrigem != -1) {
-            if((linhaOrigem + colOrigem) % 2 != 0 ) {
-                // Restaura a cor verde
-                tabuleiroInterface[linhaOrigem][colOrigem].setBackground(new Color(119, 149, 86));
-            } else {
-                // Restaura a cor bege
-                tabuleiroInterface[linhaOrigem][colOrigem].setBackground(new Color(235, 235, 208));;
-            }
+            paint.resetarCoresPadrao();
         }
         linhaOrigem = -1;
         colOrigem = -1;
-    }
-
-    private boolean moverPecaLogica(int r1, int c1, int r2, int c2) {
-        
-        // A casa de destino deve estar vazia
-        if (tabuleiroLogico.getMatriz()[r2][c2] == Peca.VAZIA) {
-            
-            // Transfere o valor (seja 1, 2, 3 ou 4) para a nova posição
-            tabuleiroLogico.getMatriz()[r2][c2] = tabuleiroLogico.getMatriz()[r1][c1];
-            tabuleiroLogico.getMatriz()[r1][c1] = Peca.VAZIA;
-
-            // Promoção simples para Dama (opcional)
-            if (tabuleiroLogico.getMatriz()[r2][c2] == Peca.PRETA && r2 == 5) {
-                tabuleiroLogico.getMatriz()[r2][c2] = Peca.DAMA_PRETA;
-            }
-            if (tabuleiroLogico.getMatriz()[r2][c2] == Peca.BRANCA && r2 == 0) {
-                tabuleiroLogico.getMatriz()[r2][c2] = Peca.DAMA_BRANCA;
-            }
-
-            return true;
-        }
-        return false;
     }
 
     public static void main(String[] args) {
@@ -164,40 +145,4 @@ public final class MainInterfaceGrafica extends JFrame {
         }
     }
 
-    private class CasaBotao extends JButton {
-
-        private char tipoPeca = Peca.VAZIA;
-
-        public void setTipoPeca(char tipo) {
-            this.tipoPeca = tipo;
-            repaint();
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-            int margem = 10;
-            // Brancas
-            if (tipoPeca == Peca.BRANCA || tipoPeca == Peca.DAMA_BRANCA) {
-                g2.setColor(Color.WHITE);
-                g2.fillOval(margem, margem, getWidth() - 2 * margem, getHeight() - 2 * margem);
-                g2.setColor(Color.BLACK);
-                g2.drawOval(margem, margem, getWidth() - 2 * margem, getHeight() - 2 * margem);
-            // Pretas
-            } else if (tipoPeca == Peca.PRETA || tipoPeca == Peca.DAMA_PRETA) {
-                g2.setColor(Color.BLACK);
-                g2.fillOval(margem, margem, getWidth() - 2 * margem, getHeight() - 2 * margem);
-            }
-
-            // Representação de Dama (uma borda dourada)
-            if (tipoPeca == Peca.DAMA_PRETA || tipoPeca == Peca.DAMA_BRANCA) {
-                g2.setColor(Color.YELLOW);
-                g2.setStroke(new BasicStroke(3));
-                g2.drawOval(margem + 5, margem + 5, getWidth() - 2 * margem - 10, getHeight() - 2 * margem - 10);
-            }
-        }
-    }
 }
