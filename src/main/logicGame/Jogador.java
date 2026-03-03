@@ -21,6 +21,7 @@ public enum Jogador {
     public int getPontuacao () {
         return pontos;
     }
+
 }
 
 

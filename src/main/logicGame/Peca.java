@@ -34,4 +34,28 @@ public final class Peca {
         return pecaAtual == BRANCA || pecaAtual == DAMA_BRANCA;
     }
 
+    public static int[][] obterDirecoesPermitidas(char pecaAtual) {
+
+        if (pecaAtual == DAMA_BRANCA || pecaAtual == DAMA_PRETA) {
+            return new int[][]{
+                    {-1, -1},
+                    {-1, 1},
+                    {1, -1},
+                    {1, 1}
+            };
+        }
+
+        // Peça comum
+        if (pecaAtual == BRANCA) {
+            return new int[][]{
+                    {-1, -1},
+                    {-1, 1}
+            };
+        } else {
+            return new int[][]{
+                    {1, -1},
+                    {1, 1}
+            };
+        }
+    }
 }

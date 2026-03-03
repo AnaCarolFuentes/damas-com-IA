@@ -22,11 +22,13 @@ public class Tabuleiro implements Cloneable {
     * Peças brancas - 1
     *
      */
-    private char[][] matriz;
-    private final int TAMANHO = 6;
+    private static char[][] matriz;
+    private static final int TAMANHO = 6;
+    private Jogador jogadorAtual;
 
     public Tabuleiro() {
         this.matriz = new char[TAMANHO][TAMANHO];
+        jogadorAtual = Jogador.BRANCAS;
         inicializar();
     }
 
@@ -65,8 +67,9 @@ public class Tabuleiro implements Cloneable {
     public char[][] getMatriz() {
         return matriz;
     }
-    public int getDimensoes()  { return TAMANHO; }
-    public char getElemento(int linha, int coluna)  { return matriz[linha][coluna]; }
+    public static int getDimensoes()  { return TAMANHO; }
+    public static char getElemento(int linha, int coluna)  { return matriz[linha][coluna]; }
+    public static void setElemento(int linha, int coluna, char elemento) { matriz[linha][coluna] = elemento; }
 
     public boolean movimentoPossivel(int linhaOrigem, int colunaOrigem, int linhaDestino, int colunaDestino) {
 
@@ -218,6 +221,51 @@ public class Tabuleiro implements Cloneable {
             matriz[linha][coluna] = Peca.DAMA_BRANCA;
         }
     }
+
+
+    public boolean dentroDoTabuleiro(int linha, int coluna) {
+        return linha >= 0 &&
+                linha < Tabuleiro.getDimensoes() &&
+                coluna >= 0 &&
+                coluna < Tabuleiro.getDimensoes();
+    }
+
+    public boolean devePromover(int linhaDestino, char peca) {
+
+        // Branca promove na linha 0
+        if (peca == Peca.BRANCA && linhaDestino == 0)
+            return true;
+
+        // Preta promove na última linha
+        if (peca == Peca.PRETA &&
+                linhaDestino == Tabuleiro.getDimensoes() - 1)
+            return true;
+
+        return false;
+    }
+
+    public void promoverTemporariamente(int linha, int coluna) {
+
+        char pecaAtual = getElemento(linha, coluna);
+
+        if (pecaAtual == Peca.BRANCA)
+            setElemento(linha, coluna, Peca.DAMA_BRANCA);
+
+        else if (pecaAtual == Peca.PRETA)
+            setElemento(linha, coluna, Peca.DAMA_PRETA);
+    }
+
+    public void reverterPromocao(int linha, int coluna) {
+
+        char pecaAtual = getElemento(linha, coluna);
+
+        if (pecaAtual == Peca.DAMA_BRANCA)
+            setElemento(linha, coluna, Peca.BRANCA);
+
+        else if (pecaAtual == Peca.DAMA_PRETA)
+            setElemento(linha, coluna, Peca.PRETA);
+    }
+
 
 
 }

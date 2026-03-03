@@ -18,7 +18,6 @@ public final class MainInterfaceGrafica extends JFrame {
     private final int TAMANHO = 6;
     private final CasaBotao[][] tabuleiroInterface = new CasaBotao[TAMANHO][TAMANHO];
     private final PintarTabuleiro paint;
-    private Jogador jogadorAtual = Jogador.BRANCAS;
     /*
         Vazio: 0
         Brancas: 1
@@ -89,7 +88,7 @@ public final class MainInterfaceGrafica extends JFrame {
 
             paint.resetarCoresPadrao();
             // Verifica se a casa clicada contém QUALQUER peça (1, 2, 3 ou 4)
-            if (casaAtual != Peca.VAZIA && casaAtual != Peca.INVALIDA && Peca.vezDe(jogadorAtual, casaAtual)) {
+            if (casaAtual != Peca.VAZIA && casaAtual != Peca.INVALIDA) {
                 linhaOrigem = linha;
                 colOrigem = col;
                 tabuleiroInterface[linha][col].setBackground(Color.YELLOW); // Destaque do clique
@@ -111,7 +110,6 @@ public final class MainInterfaceGrafica extends JFrame {
             if (sucesso) {
                 cancelarSelecao();
                 sincronizarInterface();
-                jogadorAtual = jogadorAtual.proximo(); // VERIFICAÇÃO DE QUEM É A VEZ DE JOGAR
                 /*
                     IMPLEMENTAÇÃO DA JOGADA DA IA
                 */
