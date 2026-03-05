@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main.logicGame;
+package main.entidades;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +22,7 @@ public class Tabuleiro implements Cloneable {
     * Peças brancas - 1
     *
      */
-    private static char[][] matriz;
+    private char[][] matriz;
     private static final int TAMANHO = 6;
     private Jogador jogadorAtual;
 
@@ -68,8 +68,8 @@ public class Tabuleiro implements Cloneable {
         return matriz;
     }
     public static int getDimensoes()  { return TAMANHO; }
-    public static char getElemento(int linha, int coluna)  { return matriz[linha][coluna]; }
-    public static void setElemento(int linha, int coluna, char elemento) { matriz[linha][coluna] = elemento; }
+    public char getElemento(int linha, int coluna)  { return matriz[linha][coluna]; }
+    public void setElemento(int linha, int coluna, char elemento) { matriz[linha][coluna] = elemento; }
 
     public boolean movimentoPossivel(int linhaOrigem, int colunaOrigem, int linhaDestino, int colunaDestino) {
 
@@ -266,6 +266,9 @@ public class Tabuleiro implements Cloneable {
             setElemento(linha, coluna, Peca.PRETA);
     }
 
-
+    public List<MovimentoCaptura> obterCapturasObrigatorias(Jogador jogador) {
+        GeradorCapturas gerador = new GeradorCapturas(this);
+        return gerador.encontrarMelhoresCapturas(jogador);
+    }
 
 }

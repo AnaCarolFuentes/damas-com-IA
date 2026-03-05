@@ -1,4 +1,4 @@
-package main.logicGame;
+package main.entidades;
 
 //Clase final peça para aumentar a legibilidade
 

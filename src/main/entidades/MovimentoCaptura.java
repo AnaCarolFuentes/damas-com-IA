@@ -1,6 +1,5 @@
-package main.logicGame;
+package main.entidades;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MovimentoCaptura {
@@ -22,6 +21,30 @@ public class MovimentoCaptura {
         this.destinoColuna = dC;
         this.pecasCapturadas = capturadas;
         this.caminho = caminho;
+    }
+
+    public int getOrigemLinha() {
+        return origemLinha;
+    }
+
+    public int getOrigemColuna() {
+        return origemColuna;
+    }
+
+    public int getDestinoLinha() {
+        return destinoLinha;
+    }
+
+    public int getDestinoColuna() {
+        return destinoColuna;
+    }
+
+    public List<int[]> getPecasCapturadas() {
+        return pecasCapturadas;
+    }
+
+    public List<int[]> getCaminho() {
+        return caminho;
     }
 
     public int getTotalCapturas() {

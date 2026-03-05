@@ -1,63 +1,45 @@
 package main;
 
-import main.logicGame.Jogador;
-import main.logicGame.Peca;
-import main.logicGame.Tabuleiro;
+import main.entidades.Jogador;
+import main.entidades.MovimentoCaptura;
+import main.entidades.Peca;
+import main.entidades.Tabuleiro;
+import main.logicGame.*;
 import main.ui.CasaBotao;
 import main.ui.PintarTabuleiro;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
-/**
- *
- * @author Douglas
- */
 public final class MainInterfaceGrafica extends JFrame {
 
     private final int TAMANHO = 6;
     private final CasaBotao[][] tabuleiroInterface = new CasaBotao[TAMANHO][TAMANHO];
+    private final Jogo controller;
     private final PintarTabuleiro paint;
-    /*
-        Vazio: 0
-        Brancas: 1
-        Pretas: 2
-        Damas: 3 (branca) ou 4 (preta)
 
-        REGRAS DO JOGO
-            - DEFINIR QUEM UTILIZARÁ AS PEÇAS BRANCAS (COMEÇA O JOGO) CHECK
-            - OBRIGATÓRIO COMER A PEÇA
-            - NÃO É PERMITIDO COMER PRA TRÁS CHECK
-            - UMA PEÇA PODE COMER MÚLTIPLAS PEÇAS, EM QUALQUER DIREÇÃO, DESDE QUE A PRIMEIRA SEJA PARA FRENTE
-            - A DAMA PODE ANDAR INFINITAS CASAS, RESPEITANDO O LIMITE DO TABULEIRO Check (tratar quando tiver peças a serem comidas por ela)
-            - A DAMA PODE COMER PRA TRÁS
-            - A DAMA PODE COMER MÚLTIPLAS PEÇAS
-            - A ÚLTIMA PEÇA A SER COMIDA PELA DAMA INDICA A POSIÇÃO QUE A DAMA DEVERÁ PARAR (POSIÇÃO SUBSEQUENTE NA DIREÇÃO DA COMIDA)
-            - NA IMPOSSIBILIDADE DE EFETUAR JOGADAS, O JOGADOR TRAVADO PERDE O JOGO
-    */
-
-    private final Tabuleiro tabuleiroLogico;
-
-    private int linhaOrigem = -1, colOrigem = -1;
+    private int linhaOrigem = -1;
+    private int colOrigem = -1;
 
     public MainInterfaceGrafica() {
-        
-        /*
-            TABULEIRO DO JOGO
-        */
-        tabuleiroLogico = new Tabuleiro();
 
-        paint = new PintarTabuleiro(tabuleiroLogico, tabuleiroInterface);
+        this.controller = new Jogo();
+        this.paint = new PintarTabuleiro(controller.getTabuleiro(), tabuleiroInterface);
 
-        setTitle("DISCIPLINA - IA - MINI JOGO DE DAMA");
-        setSize(800, 800);
-        setLayout(new GridLayout(TAMANHO, TAMANHO));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        configurarJanela();
         inicializarComponentes();
-        sincronizarInterface(); 
+        sincronizarInterface();
 
         setVisible(true);
+    }
+
+    private void configurarJanela() {
+        setTitle("Damas 6x6 - IA Academy");
+        setSize(700, 700);
+        setLayout(new GridLayout(TAMANHO, TAMANHO));
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
     }
 
     private void inicializarComponentes() {
@@ -65,82 +47,101 @@ public final class MainInterfaceGrafica extends JFrame {
             for (int j = 0; j < TAMANHO; j++) {
                 tabuleiroInterface[i][j] = new CasaBotao();
 
-                // Cores do tabuleiro
-                if ((i + j) % 2 == 0) {
-                    paint.setBackgroundBeige(i, j);
-                } else {
-                    paint.setBackgroundPink(i, j);
-                }
-
                 final int linha = i;
                 final int coluna = j;
+
+                // Adiciona o evento de clique
                 tabuleiroInterface[i][j].addActionListener(e -> tratarClique(linha, coluna));
                 add(tabuleiroInterface[i][j]);
             }
         }
+        paint.resetarCoresPadrao();
     }
 
     private void tratarClique(int linha, int col) {
-
-        char casaAtual = tabuleiroLogico.getMatriz()[linha][col];
-        // Caso 1: Nenhuma peça selecionada ainda
+        // 1. Seleção da peça de origem
         if (linhaOrigem == -1) {
-
-            paint.resetarCoresPadrao();
-            // Verifica se a casa clicada contém QUALQUER peça (1, 2, 3 ou 4)
-            if (casaAtual != Peca.VAZIA && casaAtual != Peca.INVALIDA) {
-                linhaOrigem = linha;
-                colOrigem = col;
-                tabuleiroInterface[linha][col].setBackground(Color.YELLOW); // Destaque do clique
-                paint.destacarMovimentosPossiveis(linhaOrigem, colOrigem);
-            }
-        } 
-        // Caso 2: Já existe uma peça selecionada, tentando mover
+            preSelecionarPeca(linha, col);
+        }
+        // 2. Tentativa de movimento para o destino
         else {
-            
-            // Se clicar na mesma peça, cancela a seleção ou se clicar em uma casa invalida
-            if (linhaOrigem == linha && colOrigem == col || casaAtual == Peca.INVALIDA) {
-                cancelarSelecao();
-                return;
-            }
-
-            if(!tabuleiroLogico.movimentoPossivel(linhaOrigem, colOrigem, linha, col)) return;
-            boolean sucesso = tabuleiroLogico.moverPecaLogica(linhaOrigem, colOrigem, linha, col);
-
-            if (sucesso) {
-                cancelarSelecao();
-                sincronizarInterface();
-                /*
-                    IMPLEMENTAÇÃO DA JOGADA DA IA
-                */
-            }
-            cancelarSelecao(); // Sempre limpa as cores após uma tentativa de movimento
+            executarMovimento(linha, col);
         }
     }
 
-    private void cancelarSelecao() {
-        if (linhaOrigem != -1) {
+    private void preSelecionarPeca(int linha, int col) {
+        char pecaClicada = controller.getTabuleiro().getElemento(linha, col);
+        Jogador atual = controller.getJogadorAtual();
+
+        if (Peca.vezDe(atual, pecaClicada)) {
+            // Busca as capturas obrigatórias UMA VEZ
+            List<MovimentoCaptura> obrigatorias = controller.getTabuleiro().obterCapturasObrigatorias(atual);
+
+            if (!obrigatorias.isEmpty()) {
+                boolean podeCapturar = obrigatorias.stream()
+                        .anyMatch(m -> m.getOrigemLinha() == linha && m.getOrigemColuna() == col);
+
+                if (!podeCapturar) {
+                    JOptionPane.showMessageDialog(this, "Atenção: Você deve realizar a captura máxima!");
+                    return;
+                }
+            }
+
+            linhaOrigem = linha;
+            colOrigem = col;
             paint.resetarCoresPadrao();
+            tabuleiroInterface[linha][col].setBackground(Color.YELLOW);
+
+            // PASSE A LISTA AQUI:
+            paint.destacarMovimentosPossiveis(linha, col, obrigatorias);
         }
+    }
+
+    private void executarMovimento(int linhaDestino, int colDestino) {
+        // Se clicar na mesma peça, cancela a seleção
+        if (linhaOrigem == linhaDestino && colOrigem == colDestino) {
+            cancelarSelecao();
+            return;
+        }
+
+        // Tenta realizar a jogada através do Controller
+        boolean sucesso = controller.tentarJogada(linhaOrigem, colOrigem, linhaDestino, colDestino);
+
+        if (sucesso) {
+            sincronizarInterface();
+            verificarEstadoJogo();
+
+            // Se o próximo turno for das PRETAS (IA), você pode chamar o método aqui
+            /* if (controller.getJogadorAtual() == Jogador.PRETAS) {
+                 executarJogadaIA();
+            } */
+        } else {
+            JOptionPane.showMessageDialog(this, "Movimento inválido ou não permitido pelas regras.");
+        }
+
+        cancelarSelecao();
+    }
+
+    private void cancelarSelecao() {
         linhaOrigem = -1;
         colOrigem = -1;
+        paint.resetarCoresPadrao();
+    }
+
+    public void sincronizarInterface() {
+        Tabuleiro tab = controller.getTabuleiro();
+        for (int i = 0; i < TAMANHO; i++) {
+            for (int j = 0; j < TAMANHO; j++) {
+                tabuleiroInterface[i][j].setTipoPeca(tab.getElemento(i, j));
+            }
+        }
+    }
+
+    // Implementar a lógica de fim de jogo futuramente
+    private void verificarEstadoJogo() {
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainInterfaceGrafica::new);
     }
-    
-    /*
-     * Atualiza a interface gráfica com base na matriz lógica do Tabuleiro. Este
-     * método será chamado após cada jogada da IA.
-     */
-    public void sincronizarInterface() {
-        for (int i = 0; i < TAMANHO; i++) {
-            for (int j = 0; j < TAMANHO; j++) {
-                char peca = tabuleiroLogico.getMatriz()[i][j];
-                tabuleiroInterface[i][j].setTipoPeca(peca);
-            }
-        }
-    }
-
 }

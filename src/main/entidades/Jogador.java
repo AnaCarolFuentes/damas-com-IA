@@ -1,4 +1,4 @@
-package main.logicGame;
+package main.entidades;
 
 public enum Jogador {
     BRANCAS,
@@ -22,6 +22,9 @@ public enum Jogador {
         return pontos;
     }
 
+    public Jogador getJogadorAtual(){
+        return this;
+    }
 }
 
 

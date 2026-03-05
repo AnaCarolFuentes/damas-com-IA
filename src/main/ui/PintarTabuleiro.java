@@ -1,14 +1,15 @@
 package main.ui;
 
-import main.logicGame.Peca;
-import main.logicGame.Tabuleiro;
+import main.entidades.MovimentoCaptura;
+import main.entidades.Peca;
+import main.entidades.Tabuleiro;
 
 import java.awt.*;
+import java.util.List;
 
 public class PintarTabuleiro {
 
     private final Tabuleiro tabuleiroLogico;
-
     private final CasaBotao [][] tabuleiroInterface;
 
     public PintarTabuleiro(Tabuleiro tabuleiroLogico, CasaBotao [][] tabuleiroInterface) {
@@ -16,11 +17,7 @@ public class PintarTabuleiro {
         this.tabuleiroInterface = tabuleiroInterface;
     }
 
-
-    public void setBackgoundBorrow(int linha, int coluna) {
-        tabuleiroInterface[linha][coluna].setBackground(new Color(139, 69, 19));
-    }
-
+    // --- Métodos de cor mantidos ---
     public void setBackgroundPink(int linha, int coluna) {
         tabuleiroInterface[linha][coluna].setBackground(new Color(255, 20, 147));
     }
@@ -28,43 +25,42 @@ public class PintarTabuleiro {
     public void setBackgroundBeige(int linha, int coluna) {
         tabuleiroInterface[linha][coluna].setBackground(new Color(245, 245, 220));
     }
+
     public void setBackgroundPurple(int linha, int coluna) {
         tabuleiroInterface[linha][coluna].setBackground(new Color (128, 0, 128));
     }
+
     public void setBackgroundRed(int linha, int coluna) {
         tabuleiroInterface[linha][coluna].setBackground(new Color (255, 0, 0));
     }
 
+    /**
+     * Agora recebe a lista de capturas obrigatórias calculadas pelo Controller.
+     */
+    public void destacarMovimentosPossiveis(int linhaOrigem, int colOrigem, List<MovimentoCaptura> capturasObrigatorias) {
 
-    public void destacarMovimentosPossiveis(int linhaOrigem, int colunaOrigem) {
-        char pecaDestaque = tabuleiroLogico.getMatriz()[linhaOrigem][colunaOrigem];
-        boolean branca = Peca.isBranca(pecaDestaque);
+        // 1. Se existem capturas obrigatórias, destacamos APENAS elas
+        if (!capturasObrigatorias.isEmpty()) {
+            for (MovimentoCaptura mov : capturasObrigatorias) {
+                // Só destaca se o movimento partir da peça que o usuário clicou
+                if (mov.getOrigemLinha() == linhaOrigem && mov.getOrigemColuna() == colOrigem) {
 
-        for (int i = 0; i < tabuleiroLogico.getDimensoes(); i++) {
-            for (int j = 0; j < tabuleiroLogico.getDimensoes(); j++) {
+                    // Pinta o destino final do salto de Roxo
+                    setBackgroundPurple(mov.getDestinoLinha(), mov.getDestinoColuna());
 
-                if (tabuleiroLogico.movimentoPossivel(linhaOrigem, colunaOrigem, i, j)) {
-                    // 1. Pinta o destino possível de roxo
-                    setBackgroundPurple(i, j);
-
-                    // 2. Lógica para achar e pintar o inimigo de Roxo
-                    int deltaLinha = i - linhaOrigem;
-                    int deltaColuna = j - colunaOrigem;
-
-                    // Se o movimento for de captura (distância > 1)
-                    if (Math.abs(deltaLinha) > 1) {
-                        int versorLinha = Integer.signum(deltaLinha);
-                        int versorColuna = Integer.signum(deltaColuna);
-                        int checkL = linhaOrigem + versorLinha;
-                        int checkC = colunaOrigem + versorColuna;
-
-                        // Percorre o caminho até o destino para achar a peça capturada
-                        while (checkL != i && checkC != j) {
-                            if (tabuleiroLogico.isEnemy(branca, checkL, checkC)) setBackgroundRed(checkL, checkC);
-
-                            checkL += versorLinha;
-                            checkC += versorLinha;
-                        }
+                    // Pinta todas as peças inimigas que serão comidas no trajeto de Vermelho
+                    for (int[] pos : mov.getPecasCapturadas()) {
+                        setBackgroundRed(pos[0], pos[1]);
+                    }
+                }
+            }
+        }
+        // 2. Se NÃO existem capturas, mostra movimentos simples normais
+        else {
+            for (int i = 0; i < Tabuleiro.getDimensoes(); i++) {
+                for (int j = 0; j < Tabuleiro.getDimensoes(); j++) {
+                    if (tabuleiroLogico.movimentoPossivel(linhaOrigem, colOrigem, i, j)) {
+                        setBackgroundPurple(i, j);
                     }
                 }
             }
@@ -72,17 +68,11 @@ public class PintarTabuleiro {
     }
 
     public void resetarCoresPadrao() {
-        for (int i = 0; i < tabuleiroLogico.getDimensoes(); i++) {
-            for (int j = 0; j < tabuleiroLogico.getDimensoes(); j++) {
-                // Cores do tabuleiro
-                if ((i + j) % 2 == 0) {
-                    setBackgroundBeige(i, j);
-                } else {
-                    setBackgroundPink(i, j);
-                }
-
+        for (int i = 0; i < Tabuleiro.getDimensoes(); i++) {
+            for (int j = 0; j < Tabuleiro.getDimensoes(); j++) {
+                if ((i + j) % 2 == 0) setBackgroundBeige(i, j);
+                else setBackgroundPink(i, j);
             }
         }
     }
-
 }

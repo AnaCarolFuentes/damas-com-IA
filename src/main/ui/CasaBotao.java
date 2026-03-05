@@ -1,6 +1,6 @@
 package main.ui;
 
-import main.logicGame.Peca;
+import main.entidades.Peca;
 
 import javax.swing.*;
 import java.awt.*;
