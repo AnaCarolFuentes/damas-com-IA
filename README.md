@@ -4,14 +4,26 @@ Este projeto implementa um jogo de damas 6x6 com interface grafica em Swing e um
 
 O objetivo deste README e explicar a logica do projeto: representacao do tabuleiro, geracao de movimentos, construcao da arvore, algoritmo Minimax com poda alfa-beta e funcao de avaliacao heuristica.
 
-## Interface do Jogo 
+## 📸 Interface do Sistema
 
-1. Tela de Inicio 
-  <img width="351" align="center" height="350" alt="image" src="https://github.com/user-attachments/assets/4ac1d95e-df0c-4313-9e5b-08188888743f" />
+A interface gráfica foi desenvolvida utilizando **Java Swing**, combinando componentes interativos com renderização customizada para fornecer um feedback visual imediato dos estados do jogo e da árvore de decisão da IA.
 
-2. Telas do Jogo
-   <img width="351" align="center" height="350" alt="image" src="https://github.com/user-attachments/assets/9ef9218e-0e3f-4b03-a734-4d9c1fa99bc0" />
-   <img width="351"  align="center" height="350" alt="image" src="https://github.com/user-attachments/assets/14ff8d22-6dd0-4209-8fcb-6a4a3e30ccea" />
+<table width="100%" style="border-collapse: collapse; border: none;">
+  <tr style="border: none;">
+    <td align="center" valign="top" width="33%" style="border: none; padding: 10px;">
+      <p><b>1. Tela de Início</b></p>
+      <img src="https://github.com/user-attachments/assets/4ac1d95e-df0c-4313-9e5b-08188888743f" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" alt="Tela de Início do Jogo" />
+    </td>
+    <td align="center" valign="top" width="33%" style="border: none; padding: 10px;">
+      <p><b>2. Partida Ativa</b></p>
+      <img src="https://github.com/user-attachments/assets/9ef9218e-0e3f-4b03-a734-4d9c1fa99bc0" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" alt="Tabuleiro de Damas em Execução" />
+    </td>
+    <td align="center" valign="top" width="33%" style="border: none; padding: 10px;">
+      <p><b>3. Fim de Jogo / Vitória</b></p>
+      <img src="https://github.com/user-attachments/assets/14ff8d22-6dd0-4209-8fcb-6a4a3e30ccea" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" alt="Tela de Fim de Jogo" />
+    </td>
+  </tr>
+</table>
 
 
 
