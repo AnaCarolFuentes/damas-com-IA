@@ -1,42 +1,48 @@
-package main;
+package main.ui;
 
 import main.entidades.Jogador;
 import main.entidades.MovimentoCaptura;
 import main.entidades.Peca;
 import main.entidades.Tabuleiro;
 import main.logicGame.*;
-import main.ui.CasaBotao;
-import main.ui.PintarTabuleiro;
+import main.util.GerenciadorAudio;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public final class MainInterfaceGrafica extends JFrame {
+public final class InterfaceGrafica extends JFrame {
 
     private final int TAMANHO = 6;
     private final CasaBotao[][] tabuleiroInterface = new CasaBotao[TAMANHO][TAMANHO];
-    private final Jogo controller;
+    private final Controlador controller;
     private final PintarTabuleiro paint;
+    private final Color COR_DICA = new Color(173, 216, 230);
 
     private int linhaOrigem = -1;
     private int colOrigem = -1;
 
-    public MainInterfaceGrafica() {
-
-        this.controller = new Jogo();
+    public InterfaceGrafica(Jogador jogadorHumano, int profundidade) {
+        // O controlador já inicializa o tabuleiro compacto internamente
+        this.controller = new Controlador(jogadorHumano, profundidade);
         this.paint = new PintarTabuleiro(controller.getTabuleiro(), tabuleiroInterface);
 
         configurarJanela();
         inicializarComponentes();
         sincronizarInterface();
 
+        // Se o humano escolheu ser as Pretas, as Brancas (IA) começam
+        if (controller.getJogadorIA() == Jogador.BRANCAS) {
+            processarJogadaIA();
+        }
+
         setVisible(true);
     }
 
     private void configurarJanela() {
-        setTitle("Damas 6x6 - IA Academy");
+        setTitle("Damas 6x6 - Otimização Vetorial (IFSULDEMINAS)");
         setSize(700, 700);
+        setResizable(false);
         setLayout(new GridLayout(TAMANHO, TAMANHO));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -50,7 +56,7 @@ public final class MainInterfaceGrafica extends JFrame {
                 final int linha = i;
                 final int coluna = j;
 
-                // Adiciona o evento de clique
+                // O Tradutor ajuda a ignorar cliques em casas brancas (inválidas)
                 tabuleiroInterface[i][j].addActionListener(e -> tratarClique(linha, coluna));
                 add(tabuleiroInterface[i][j]);
             }
@@ -59,22 +65,31 @@ public final class MainInterfaceGrafica extends JFrame {
     }
 
     private void tratarClique(int linha, int col) {
-        // 1. Seleção da peça de origem
+
+        if (controller.isVezIA()) return;
+
         if (linhaOrigem == -1) {
-            preSelecionarPeca(linha, col);
+            if (tabuleiroInterface[linha][col].getBackground().equals(COR_DICA)) {
+                preSelecionarPeca(linha, col);
+            } else {
+                System.out.println("Clique ignorado: Peça não possui movimentos válidos ou obrigatórios.");
+            }
         }
-        // 2. Tentativa de movimento para o destino
         else {
-            executarMovimento(linha, col);
+            if (tabuleiroInterface[linha][col].getBackground().equals(COR_DICA)) {
+                preSelecionarPeca(linha, col);
+            } else {
+                executarMovimento(linha, col);
+            }
         }
     }
 
     private void preSelecionarPeca(int linha, int col) {
         char pecaClicada = controller.getTabuleiro().getElemento(linha, col);
+        GerenciadorAudio.tocarSom("clique.wav");
         Jogador atual = controller.getJogadorAtual();
 
         if (Peca.vezDe(atual, pecaClicada)) {
-            // Busca as capturas obrigatórias UMA VEZ
             List<MovimentoCaptura> obrigatorias = controller.getTabuleiro().obterCapturasObrigatorias(atual);
 
             if (!obrigatorias.isEmpty()) {
@@ -82,50 +97,72 @@ public final class MainInterfaceGrafica extends JFrame {
                         .anyMatch(m -> m.getOrigemLinha() == linha && m.getOrigemColuna() == col);
 
                 if (!podeCapturar) {
-                    JOptionPane.showMessageDialog(this, "Atenção: Você deve realizar a captura máxima!");
+                    JOptionPane.showMessageDialog(this, "Atenção: Você deve realizar a captura obrigatória!");
                     return;
                 }
             }
 
             linhaOrigem = linha;
             colOrigem = col;
+
             paint.resetarCoresPadrao();
             tabuleiroInterface[linha][col].setBackground(Color.YELLOW);
-
-            // PASSE A LISTA AQUI:
             paint.destacarMovimentosPossiveis(linha, col, obrigatorias);
         }
     }
 
     private void executarMovimento(int linhaDestino, int colDestino) {
-        // Se clicar na mesma peça, cancela a seleção
+
         if (linhaOrigem == linhaDestino && colOrigem == colDestino) {
             cancelarSelecao();
             return;
         }
 
-        // Tenta realizar a jogada através do Controller
         boolean sucesso = controller.tentarJogada(linhaOrigem, colOrigem, linhaDestino, colDestino);
 
         if (sucesso) {
+            tocarSonsUltimaJogada();
+            cancelarSelecao();
             sincronizarInterface();
-            verificarEstadoJogo();
 
-            // Se o próximo turno for das PRETAS (IA), você pode chamar o método aqui
-            /* if (controller.getJogadorAtual() == Jogador.PRETAS) {
-                 executarJogadaIA();
-            } */
+            if (controller.isVezIA()) {
+                processarJogadaIA();
+            }
+            if (!verificarFimDeJogo() && controller.isVezIA()) {
+                processarJogadaIA();
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "Movimento inválido ou não permitido pelas regras.");
+            char pecaDestino = controller.getTabuleiro().getElemento(linhaDestino, colDestino);
+            if (Peca.vezDe(controller.getJogadorAtual(), pecaDestino)) {
+                preSelecionarPeca(linhaDestino, colDestino);
+            } else {
+                JOptionPane.showMessageDialog(this, "Movimento inválido.");
+                cancelarSelecao();
+            }
         }
+    }
 
-        cancelarSelecao();
+    private void processarJogadaIA() {
+        Timer timer = new Timer(600, e -> {
+            controller.executarJogadaIA();
+            tocarSonsUltimaJogada();
+            sincronizarInterface();
+            verificarFimDeJogo();
+        });
+        timer.setRepeats(false);
+        timer.start();
+    }
+
+    private boolean verificarFimDeJogo() {
+        controller.verificarEstadoJogo();
+        return false;
     }
 
     private void cancelarSelecao() {
         linhaOrigem = -1;
         colOrigem = -1;
         paint.resetarCoresPadrao();
+        atualizarDicasVisuais();
     }
 
     public void sincronizarInterface() {
@@ -135,13 +172,30 @@ public final class MainInterfaceGrafica extends JFrame {
                 tabuleiroInterface[i][j].setTipoPeca(tab.getElemento(i, j));
             }
         }
+        atualizarDicasVisuais();
     }
 
-    // Implementar a lógica de fim de jogo futuramente
-    private void verificarEstadoJogo() {
+    private void atualizarDicasVisuais() {
+
+        paint.resetarCoresPadrao();
+
+        if (linhaOrigem != -1) {
+            tabuleiroInterface[linhaOrigem][colOrigem].setBackground(Color.YELLOW);
+            return;
+        }
+
+        List<int[]> dicas = controller.obterCasasComMovimentosPossiveis();
+
+
+        paint.aplicarDicas(dicas);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(MainInterfaceGrafica::new);
+    private void tocarSonsUltimaJogada() {
+        if (controller.ultimaJogadaCapturou()) {
+            GerenciadorAudio.tocarSom("captura.wav");
+        }
+        if (controller.ultimaJogadaPromoveu()) {
+            GerenciadorAudio.tocarSom("dama.wav");
+        }
     }
 }

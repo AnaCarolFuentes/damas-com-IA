@@ -1,5 +1,6 @@
 package main.entidades;
 
+import main.logicGame.Tradutor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,33 +18,33 @@ public class GeradorCapturas {
         melhoresMovimentos = new ArrayList<>();
         maxCapturasGlobal = 0;
 
-        for (int i = 0; i < tabuleiro.getDimensoes(); i++) {
-            for (int j = 0; j < tabuleiro.getDimensoes(); j++) {
-                if ((Peca.vezDe(jogadorAtual, tabuleiro.getElemento(i, j)))) {
-                    List<int[]> capturadas = new ArrayList<>();
-                    List<int[]> caminho = new ArrayList<>();
-                    caminho.add(new int[]{i, j});
-                    construirPossibilidadesCapturas(i, j, i, j, capturadas, caminho, false, true);
-                }
+        // Varre os 18 índices do vetor compacto
+        for (int i = 0; i < 18; i++) {
+            // Traduz índice para coordenada apenas para buscar o elemento e manter a lógica
+            int[] coord = Tradutor.converteParaCoordenada(i);
+            char peca = tabuleiro.getElemento(coord[0], coord[1]);
+
+            if (Peca.vezDe(jogadorAtual, peca)) {
+                List<Integer> capturadas = new ArrayList<>();
+                List<Integer> caminho = new ArrayList<>();
+                caminho.add(i); // Adiciona o índice de origem ao caminho
+
+                construirPossibilidadesCapturas(coord[0], coord[1], coord[0], coord[1], capturadas, caminho, false, true);
             }
         }
         return melhoresMovimentos;
     }
 
-    public void construirPossibilidadesCapturas(int linhaAtual, int colunaAtual, int origemLinha, int origemColuna, List<int[]> capturadas, List<int[]> caminho, boolean foiPromovida, boolean ehPrimeiroSalto) {
+    public void construirPossibilidadesCapturas(int linhaAtual, int colunaAtual, int origemLinha, int origemColuna, List<Integer> capturadas, List<Integer> caminho, boolean foiPromovida, boolean ehPrimeiroSalto) {
 
         boolean encontrouCaptura = false;
         char pecaAtual = tabuleiro.getElemento(linhaAtual, colunaAtual);
 
         int[][] direcoes;
 
-        // REGRA ESPECIAL:
-        // Se for o primeiro salto e for uma peça comum, usa as direções padrão (frente).
-        // Se for dama ou se já for o segundo/terceiro salto, libera as 4 direções.
         if (!Peca.isDama(pecaAtual) && ehPrimeiroSalto) {
             direcoes = Peca.obterDirecoesPermitidas(pecaAtual);
         } else {
-            // Libera todas as direções para Damas ou saltos subsequentes de peças comuns
             direcoes = new int[][]{{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
         }
 
@@ -56,21 +57,21 @@ public class GeradorCapturas {
             if (ehCapturaValida(linhaAtual, colunaAtual, meioL, meioC, destinoL, destinoC)) {
                 encontrouCaptura = true;
 
-                // --- Lógica de Backup e Movimento ---
                 char pecaMovida = pecaAtual;
                 char pecaInimiga = tabuleiro.getElemento(meioL, meioC);
+
+                int indiceMeio = Tradutor.converteParaIndice(meioL, meioC);
+                int indiceDestino = Tradutor.converteParaIndice(destinoL, destinoC);
 
                 tabuleiro.setElemento(linhaAtual, colunaAtual, Peca.VAZIA);
                 tabuleiro.setElemento(meioL, meioC, Peca.VAZIA);
                 tabuleiro.setElemento(destinoL, destinoC, pecaMovida);
 
-                capturadas.add(new int[]{meioL, meioC});
-                caminho.add(new int[]{destinoL, destinoC});
+                capturadas.add(indiceMeio);
+                caminho.add(indiceDestino);
 
-                // RECURSÃO: Agora ehPrimeiroSalto passa a ser FALSE
                 construirPossibilidadesCapturas(destinoL, destinoC, origemLinha, origemColuna, capturadas, caminho, foiPromovida, false);
 
-                // --- Backtracking (reverter tudo) ---
                 tabuleiro.setElemento(linhaAtual, colunaAtual, pecaMovida);
                 tabuleiro.setElemento(meioL, meioC, pecaInimiga);
                 tabuleiro.setElemento(destinoL, destinoC, Peca.VAZIA);
@@ -79,9 +80,8 @@ public class GeradorCapturas {
             }
         }
 
-        //FIM DO CAMINHO
+        // FIM DO CAMINHO
         if (!encontrouCaptura && capturadas.size() > 0) {
-
             int total = capturadas.size();
 
             if (total > maxCapturasGlobal) {
@@ -90,34 +90,46 @@ public class GeradorCapturas {
             }
 
             if (total == maxCapturasGlobal) {
-                MovimentoCaptura mov = new MovimentoCaptura(origemLinha, origemColuna, linhaAtual, colunaAtual, new ArrayList<>(capturadas), new ArrayList<>(caminho));
+                // Instancia usando os índices
+                int oI = Tradutor.converteParaIndice(origemLinha, origemColuna);
+                int dI = Tradutor.converteParaIndice(linhaAtual, colunaAtual);
+
+                MovimentoCaptura mov = new MovimentoCaptura(oI, dI, new ArrayList<>(capturadas), new ArrayList<>(caminho));
                 melhoresMovimentos.add(mov);
             }
         }
     }
 
     private boolean ehCapturaValida(int linhaAtual, int colunaAtual, int meioL, int meioC, int destinoL, int destinoC) {
-
         if (!tabuleiro.dentroDoTabuleiro(destinoL, destinoC))
             return false;
 
         if (tabuleiro.getElemento(destinoL, destinoC) != Peca.VAZIA)
             return false;
 
-        // 3️⃣ casa do meio dentro do tabuleiro
         if (!tabuleiro.dentroDoTabuleiro(meioL, meioC))
             return false;
 
         char pecaAtual = tabuleiro.getElemento(linhaAtual, colunaAtual);
-        char pecaMeio = tabuleiro.getElemento(meioL, meioC);
-
-        if (!tabuleiro.isEnemy(Peca.isBranca(pecaAtual), meioL, meioC))
-            return false;
-
-        return true;
+        return tabuleiro.isEnemy(Peca.isBranca(pecaAtual), meioL, meioC);
     }
 
+    public boolean podeContinuarCapturando(int linha, int coluna) {
+        char peca = tabuleiro.getElemento(linha, coluna);
+        if (peca == Peca.VAZIA || peca == Peca.INVALIDA) return false;
 
+        int[][] direcoes = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
 
+        for (int[] dir : direcoes) {
+            int meioL = linha + dir[0];
+            int meioC = coluna + dir[1];
+            int destinoL = linha + 2 * dir[0];
+            int destinoC = coluna + 2 * dir[1];
 
+            if (ehCapturaValida(linha, coluna, meioL, meioC, destinoL, destinoC)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

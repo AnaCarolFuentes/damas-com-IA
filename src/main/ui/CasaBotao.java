@@ -8,6 +8,7 @@ import java.awt.*;
 public class CasaBotao extends JButton {
 
     private char tipoPeca = Peca.VAZIA;
+    private boolean clicavel = false;
 
     public void setTipoPeca(char tipo) {
         this.tipoPeca = tipo;
@@ -40,4 +41,7 @@ public class CasaBotao extends JButton {
             g2.drawOval(margem + 5, margem + 5, getWidth() - 2 * margem - 10, getHeight() - 2 * margem - 10);
         }
     }
+
+    public void setClicavel(boolean valor) { this.clicavel = valor; }
+    public boolean isClicavel() { return this.clicavel; }
 }
