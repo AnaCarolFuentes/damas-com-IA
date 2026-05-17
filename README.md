@@ -19,7 +19,7 @@ A interface gráfica foi desenvolvida utilizando **Java Swing**, combinando comp
       <img src="https://github.com/user-attachments/assets/9ef9218e-0e3f-4b03-a734-4d9c1fa99bc0" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" alt="Tabuleiro de Damas em Execução" />
     </td>
     <td align="center" valign="top" width="33%" style="border: none; padding: 10px;">
-      <p><b>3. Fim de Jogo / Vitória</b></p>
+      <p><b>3. Possibilidades de jogada</b></p>
       <img src="https://github.com/user-attachments/assets/14ff8d22-6dd0-4209-8fcb-6a4a3e30ccea" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" alt="Tela de Fim de Jogo" />
     </td>
   </tr>
