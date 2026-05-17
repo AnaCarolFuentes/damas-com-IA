@@ -549,4 +549,9 @@ Para executar a partir da pasta compilada:
 ```bash
 java -cp /tmp/tpi-build main.Main
 ```
+# Fotos do game
+<img width="699" height="699" alt="image" src="https://github.com/user-attachments/assets/016cd513-66e6-4298-a419-61cb18400d13" />
+<img width="699" height="699" alt="image" src="https://github.com/user-attachments/assets/e1d63267-da0c-4f9c-8114-e74f4ffb1807" />
+<img width="699" height="699" alt="image" src="https://github.com/user-attachments/assets/5548bd37-6899-43cc-b003-895094bc97b3" />
+
 
