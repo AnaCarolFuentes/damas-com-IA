@@ -1,10 +1,10 @@
-# Damas 6x6 com IA
+# ♟️ Damas 6x6 com IA
 
 Este projeto implementa um jogo de damas 6x6 com interface grafica em Swing e uma IA baseada em busca adversarial. A IA analisa jogadas futuras, simula respostas do adversario e escolhe a jogada com maior pontuacao segundo uma heuristica.
 
 O objetivo deste README e explicar a logica do projeto: representacao do tabuleiro, geracao de movimentos, construcao da arvore, algoritmo Minimax com poda alfa-beta e funcao de avaliacao heuristica.
 
-## Visao geral da IA
+## 🤖 Visao geral da IA
 
 A IA funciona em quatro etapas principais:
 
@@ -20,7 +20,7 @@ Em termos de Inteligencia Artificial, este e um problema de busca em jogo de som
 - Cada no da arvore representa um estado possivel do tabuleiro apos uma jogada.
 - A heuristica estima o quao bom e um estado quando nao vale a pena, ou nao da tempo, expandir a arvore ate o fim real da partida.
 
-## Arquivos principais
+## 📁 Arquivos principais
 
 - `src/main/logicGame/Controlador.java`: controla turnos, chama a IA e aplica jogadas no tabuleiro real.
 - `src/main/ai/Tree.java`: implementa a busca Minimax com poda alfa-beta.
@@ -34,7 +34,7 @@ Em termos de Inteligencia Artificial, este e um problema de busca em jogo de som
 - `src/main/entidades/GeradorCapturas.java`: encontra capturas obrigatorias e sequencias de captura multipla.
 - `src/main/logicGame/Tradutor.java`: converte coordenadas da matriz 6x6 para o vetor compacto de 18 posicoes.
 
-## Representacao do tabuleiro
+## 🧩 Representacao do tabuleiro
 
 Embora a interface mostre uma matriz 6x6, a IA usa um vetor compacto de 18 posicoes:
 
@@ -64,7 +64,7 @@ indice = (linha * 3) + (coluna / 2);
 
 E tambem converte o indice de volta para linha e coluna quando a interface precisa pintar ou mover uma peca.
 
-## Pecas e valores internos
+## ♟️ Pecas e valores internos
 
 As pecas sao representadas por caracteres:
 
@@ -83,7 +83,7 @@ A classe `Peca` tambem define as direcoes permitidas:
 - Pretas comuns andam para baixo: `{1, -1}` e `{1, 1}`.
 - Damas andam nas quatro diagonais.
 
-## Fluxo quando chega a vez da IA
+## 🔄 Fluxo quando chega a vez da IA
 
 O fluxo comeca em `Controlador.executarJogadaIA()`:
 
@@ -105,7 +105,7 @@ tabuleiro.importarVetor(melhorMovimento.getEstado());
 
 Ou seja: a IA nao move a peca diretamente na interface. Ela escolhe um estado futuro. Depois o controlador substitui o estado atual do tabuleiro pelo estado escolhido.
 
-## O que e um Node
+## 🌳 O que e um Node
 
 Um `Node` representa uma jogada ou um estado dentro da arvore.
 
@@ -123,7 +123,7 @@ Na apresentacao, uma boa forma de explicar e:
 
 > Cada no e uma fotografia do tabuleiro depois de uma jogada. A arvore e o conjunto de fotografias futuras que a IA consegue imaginar.
 
-## Geracao de movimentos
+## 🎯 Geracao de movimentos
 
 A geracao de movimentos acontece em `Simulador.gerarEstadosFilhos()`.
 
@@ -155,7 +155,7 @@ Tem captura?
   Nao -> gerar movimentos simples
 ```
 
-## Capturas obrigatorias e multiplas
+## ⚔️ Capturas obrigatorias e multiplas
 
 A classe `GeradorCapturas` busca as melhores sequencias de captura.
 
@@ -182,7 +182,7 @@ a rota com 2 capturas e considerada melhor.
 
 Isso implementa a regra de prioridade da maior captura.
 
-## Construcao da arvore
+## 🌿 Construcao da arvore
 
 A arvore e construida em `Tree.decidirMelhorJogada()`.
 
@@ -218,7 +218,7 @@ Nivel 4: respostas do humano
 
 Quando a profundidade chega a zero, a arvore para de expandir e chama a heuristica.
 
-## Minimax
+## 🧠 Minimax
 
 O Minimax e usado porque o jogo tem dois lados com objetivos opostos.
 
@@ -264,7 +264,7 @@ alfabeta(no, profundidade, alpha, beta, maximizando):
         retorna melhor
 ```
 
-## Poda alfa-beta
+## ✂️ Poda alfa-beta
 
 A poda alfa-beta e uma otimizacao do Minimax.
 
@@ -287,7 +287,7 @@ Beneficio:
 - Permite usar profundidades maiores.
 - Mantem o mesmo resultado do Minimax, quando a ordenacao dos filhos e a mesma.
 
-## Heuristica
+## 📊 Heuristica
 
 A heuristica e a funcao que da uma nota para um estado do tabuleiro.
 
@@ -305,7 +305,7 @@ Contrato:
 - Score negativo: vantagem do humano.
 - Score perto de zero: jogo equilibrado.
 
-## Heuristica principal: AvaliacaoOtimizada
+## ⭐ Heuristica principal: AvaliacaoOtimizada
 
 A IA atual usa `AvaliacaoOtimizada`.
 
@@ -378,7 +378,7 @@ score = 565 - 330 = 235
 
 Score positivo indica vantagem da IA.
 
-## Por que a dama vale mais
+## 👑 Por que a dama vale mais
 
 A dama vale mais porque tem maior mobilidade. Ela pode andar nas quatro diagonais, enquanto a peca comum tem direcao limitada. Isso aumenta o numero de movimentos possiveis e a capacidade de atacar ou escapar.
 
@@ -391,7 +391,7 @@ dama = 300
 
 Ou seja, uma dama equivale aproximadamente a tres pecas comuns.
 
-## Por que existe bonus posicional
+## 📍 Por que existe bonus posicional
 
 Contar apenas pecas nao e suficiente. Duas posicoes com o mesmo numero de pecas podem ter qualidades muito diferentes.
 
@@ -403,7 +403,7 @@ O bonus posicional incentiva:
 
 Isso torna a IA menos mecanica. Ela nao escolhe apenas capturar ou acumular material; ela tambem prefere posicoes melhores.
 
-## Heuristicas alternativas
+## 🧪 Heuristicas alternativas
 
 O projeto tem outras heuristicas implementadas.
 
@@ -450,7 +450,7 @@ Ela foi pensada para ser rapida e adequada ao vetor compacto:
 - Usa valores maiores para diferenciar material e dama.
 - Adiciona bonus defensivo.
 
-## Captura multipla e turno
+## 🔁 Captura multipla e turno
 
 Em damas, uma peca pode continuar capturando na mesma jogada.
 
@@ -465,7 +465,7 @@ Se ainda pode capturar, o turno logico permanece com o mesmo jogador. Se nao pod
 
 Isso e importante porque a arvore precisa representar corretamente sequencias de captura.
 
-## Estados terminais
+## 🏁 Estados terminais
 
 Dentro de `Tree.alfabeta()`, se nao existem sucessores:
 
@@ -480,7 +480,7 @@ Interpretacao:
 
 Esses valores grandes fazem o algoritmo preferir vitorias reais em vez de pequenas vantagens posicionais.
 
-## Exemplo completo de decisao
+## 🧭 Exemplo completo de decisao
 
 Imagine que a IA tem tres jogadas possiveis:
 
@@ -503,7 +503,7 @@ A IA deste projeto faz diferente:
 
 Essa e a ideia central do Minimax.
 
-## Custo computacional
+## ⏱️ Custo computacional
 
 Se cada estado tiver em media `b` jogadas possiveis e a profundidade for `d`, o Minimax puro tende a analisar aproximadamente:
 
@@ -536,7 +536,7 @@ Profundidade maxima: Y
 Melhor jogada: ...
 ```
 
-## Como compilar
+## 🚀 Como compilar
 
 Sem ferramenta de build, e possivel compilar com:
 
@@ -549,9 +549,4 @@ Para executar a partir da pasta compilada:
 ```bash
 java -cp /tmp/tpi-build main.Main
 ```
-# Fotos do game
-<img width="699" height="699" alt="image" src="https://github.com/user-attachments/assets/016cd513-66e6-4298-a419-61cb18400d13" />
-<img width="699" height="699" alt="image" src="https://github.com/user-attachments/assets/e1d63267-da0c-4f9c-8114-e74f4ffb1807" />
-<img width="699" height="699" alt="image" src="https://github.com/user-attachments/assets/5548bd37-6899-43cc-b003-895094bc97b3" />
-
 
