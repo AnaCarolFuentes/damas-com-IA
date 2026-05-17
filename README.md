@@ -4,6 +4,17 @@ Este projeto implementa um jogo de damas 6x6 com interface grafica em Swing e um
 
 O objetivo deste README e explicar a logica do projeto: representacao do tabuleiro, geracao de movimentos, construcao da arvore, algoritmo Minimax com poda alfa-beta e funcao de avaliacao heuristica.
 
+## Interface do Jogo 
+
+1. Tela de Inicio 
+  <img width="351" align="center" height="350" alt="image" src="https://github.com/user-attachments/assets/4ac1d95e-df0c-4313-9e5b-08188888743f" />
+
+2. Telas do Jogo
+   <img width="351" align="center" height="350" alt="image" src="https://github.com/user-attachments/assets/9ef9218e-0e3f-4b03-a734-4d9c1fa99bc0" />
+   <img width="351"  align="center" height="350" alt="image" src="https://github.com/user-attachments/assets/14ff8d22-6dd0-4209-8fcb-6a4a3e30ccea" />
+
+
+
 ## 🤖 Visao geral da IA
 
 A IA funciona em quatro etapas principais:
